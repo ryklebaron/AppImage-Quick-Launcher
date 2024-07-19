@@ -33,8 +33,11 @@ if [ -n "$chosen_appimage" ]; then
   chmod +x "$full_path"  # Make sure the file is executable
 
   if [ $? -eq 0 ]; then
-    # Run the selected AppImage in the background and log to the appimage location nohup.out
-    nohup "$full_path"  2>&1  &
+    # Define the log file location
+    LOG_FILE="$APPIMAGE_DIR/nohup.out"
+
+    # Run the selected AppImage in the background and log to the specified location
+    nohup "$full_path" > "$LOG_FILE" 2>&1 &
   else
     zenity --error --text="Error making the file executable. Exiting."
     exit 1
