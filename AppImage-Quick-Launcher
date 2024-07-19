@@ -1,46 +1,34 @@
-#!/bin/bash
+# AppImage-Quick-Launcher
 
-# Set the directory where the AppImages are located
-APPIMAGE_DIR="/Absolute/Path/To/Your/appImages/Folder"
+Creates a GUI that lets you select which AppImage you want to run.
 
-# Find all .AppImage files in the directory and store them in an array
-appimages=("$APPIMAGE_DIR"/*.AppImage)
+The idea of creating a sandbox/container for applications is a good development regarding security. The problem I encountered with AppImages was that every time I wanted to execute an AppImage, I had to navigate to its location to run it. This was becoming frustrating, so I created a script that generates a GUI to list all your AppImages, allowing you to select and run the desired one.
 
-# Check if any AppImages were found
-if [ ${#appimages[@]} -eq 0 ]; then
-  zenity --error --text="No AppImages found in $APPIMAGE_DIR"
-  exit 1
-fi
+![AppImage-Quick-Launcher Screenshot](images/screenshot.png)
 
-# Use zenity to show a graphical selection menu
-chosen_appimage=$(zenity --list \
-  --title="Select an AppImage" \
-  --column="AppImages" \
-  --hide-header \
-  $(for appimage in "${appimages[@]}"; do echo "${appimage##*/}"; done))
+# Installation Guide
 
-# Check if the user made a selection
-if [ -n "$chosen_appimage" ]; then
-  # Find the full path of the selected AppImage
-  for appimage in "${appimages[@]}"; do
-    if [[ "${appimage##*/}" == "$chosen_appimage" ]]; then
-      full_path="$appimage"
-      break
-    fi
-  done
+1. Place the `AppImage-Quick-Launcher` file in one of your `$PATH` directories, e.g., `/usr/bin/`.
+2. Make the file executable:
+    ```bash
+    sudo chmod 700 /usr/bin/AppImage-Quick-Launcher
+    ```
 
-  echo "You chose $full_path"
-  chmod +x "$full_path"  # Make sure the file is executable
+## Define Your Default AppImage Folder
 
-  if [ $? -eq 0 ]; then
-    # Run the selected AppImage in the background
-    nohup "$full_path" >/dev/null 2>&1 &
-  else
-    zenity --error --text="Error making the file executable. Exiting."
-    exit 1
-  fi
-else
-  zenity --error --text="No valid choice made. Exiting script."
-  exit 1
-fi
+In the file, change the `APPIMAGE_DIR` variable to point to the folder where you save your AppImages.
 
+### Optional
+
+Assign a shortcut key to your script. (I use Ubuntu, so here's how you can do it!)
+
+1. Go to Settings.
+2. On the left, select **Keyboard**.
+3. Under **Keyboard Shortcuts**, select **View and Customize Shortcuts**.
+4. Scroll down and select **Custom Shortcuts**.
+5. Click **+** to add a new shortcut.
+6. Enter the following details:
+    - **Name**: Insert a name for this shortcut.
+    - **Command**: `/usr/bin/AppImage-Quick-Launcher`
+7. Click **Shortcut**.
+8. You can now add your own shortcut key. This will launch the script.
