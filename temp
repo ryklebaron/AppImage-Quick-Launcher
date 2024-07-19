@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Set the directory where the AppImages are located
+APPIMAGE_DIR="/home/rykle/appImages"
+
+# Function to check if fuse is installed
+check_fuse() {
+    if dpkg -l | grep -q "^ii  fuse"; then
+        echo "fuse is installed."
+    else
+        echo "fuse is not installed. Installing fuse..."
+        if sudo apt update && sudo apt install -y fuse; then
+            echo "fuse has been installed successfully."
+        else
+            zenity --error --text="FUSE needs to be installed to run AppImages. Installation failed."
+            exit 1
+        fi
+    fi
+}
+
+# Check if any AppImages were found
+appimages=("$APPIMAGE_DIR"/*.AppImage)
+if [ ${#appimages[@]} -eq 0 ]; then
+    zenity --error --text="No AppImages found in $APPIMAGE_DIR"
+    exit 1
+fi
+
+# Check if fuse package is installed and install it if necessary
+check_fuse
+
+# Use zenity to show a graphical selection menu
+chosen_appimage=$(zenity --list \
+  --title="Select an AppImage" \
+  --column="AppImages" \
+  --hide-header \
+  $(for appimage in "${appimages[@]}"; do echo "${appimage##*/}"; done))
+
+# Check if the user made a selection
+if [ -n "$chosen_appimage" ]; then
+    # Find the full path of the selected AppImage
+    for appimage in "${appimages[@]}"; do
+        if [[ "${appimage##*/}" == "$chosen_appimage" ]]; then
+            full_path="$appimage"
+            break
+        fi
+    done
+
+    echo "You chose $full_path"
+    chmod +x "$full_path"  # Make sure the file is executable
+
+    if [ $? -eq 0 ]; then
+        # Run the selected AppImage in the background
+        nohup "$full_path" >/dev/null 2>&1 &
+    else
+        zenity --error --text="Error making the file executable. Exiting."
+        exit 1
+    fi
+else
+    zenity --error --text="No valid choice made. Exiting script."
+    exit 1
+fi

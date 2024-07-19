@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the directory where the AppImages are located
-APPIMAGE_DIR="/home/rykle/appImages"
+APPIMAGE_DIR="$HOME/appImages"
 
 # Find all .AppImage files in the directory and store them in an array
 appimages=("$APPIMAGE_DIR"/*.AppImage)
@@ -33,8 +33,8 @@ if [ -n "$chosen_appimage" ]; then
   chmod +x "$full_path"  # Make sure the file is executable
 
   if [ $? -eq 0 ]; then
-    # Run the selected AppImage in the background
-    nohup "$full_path" >/dev/null 2>&1 &
+    # Run the selected AppImage in the background and log to the appimage location nohup.out
+    nohup "$full_path"  2>&1  &
   else
     zenity --error --text="Error making the file executable. Exiting."
     exit 1
