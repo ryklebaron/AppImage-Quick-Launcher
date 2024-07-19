@@ -32,3 +32,7 @@ Assign a shortcut key to your script. (I use Ubuntu, so here's how you can do it
     - **Command**: `/usr/bin/AppImage-Quick-Launcher`
 7. Click **Shortcut**.
 8. You can now add your own shortcut key. This will launch the script.
+
+
+## Logfile
+A logfile `nohup.out` is created in your appImage location folder/ 
