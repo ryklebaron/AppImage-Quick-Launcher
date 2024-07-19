@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Set the directory where the AppImages are located
+APPIMAGE_DIR="/Absolute/Path/To/Your/appImages/Folder"
+
+# Find all .AppImage files in the directory and store them in an array
+appimages=("$APPIMAGE_DIR"/*.AppImage)
+
+# Check if any AppImages were found
+if [ ${#appimages[@]} -eq 0 ]; then
+  zenity --error --text="No AppImages found in $APPIMAGE_DIR"
+  exit 1
+fi
+
+# Use zenity to show a graphical selection menu
+chosen_appimage=$(zenity --list \
+  --title="Select an AppImage" \
+  --column="AppImages" \
+  --hide-header \
+  $(for appimage in "${appimages[@]}"; do echo "${appimage##*/}"; done))
+
+# Check if the user made a selection
+if [ -n "$chosen_appimage" ]; then
+  # Find the full path of the selected AppImage
+  for appimage in "${appimages[@]}"; do
+    if [[ "${appimage##*/}" == "$chosen_appimage" ]]; then
+      full_path="$appimage"
+      break
+    fi
+  done
+
+  echo "You chose $full_path"
+  chmod +x "$full_path"  # Make sure the file is executable
+
+  if [ $? -eq 0 ]; then
+    # Run the selected AppImage in the background
+    nohup "$full_path" >/dev/null 2>&1 &
+  else
+    zenity --error --text="Error making the file executable. Exiting."
+    exit 1
+  fi
+else
+  zenity --error --text="No valid choice made. Exiting script."
+  exit 1
+fi
+
